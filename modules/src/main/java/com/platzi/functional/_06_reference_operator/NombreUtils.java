@@ -22,7 +22,7 @@ public class NombreUtils {
 
         //To be able to use the method "System.out::println" on "forEach" must have same quantity and parameters
     }
-    static <T> List<T> getList (T... elements){
+    public static <T> List<T> getList (T... elements){
         return Arrays.asList(elements);
     }
 }
