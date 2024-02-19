@@ -80,9 +80,10 @@ Advantages:
 
 - Facilitates the creation of threads
 
-Disadvantages
+Disadvantages:
+
 - For each modification, we need a new instance.
 
 - Requires special attention in design.
 
-- There are many mutable objects out of our reach so we must generate some way so that these objects do not mutate.Example. Java lists are mutable. We can generate immutability by returning a copy this prevents add malicious emails to an email list
+- There are many mutable objects out of our reach so we must generate some way so that these objects do not mutate.Example. **Java lists are mutable. We can generate immutability by returning a copy this prevents add malicious emails to an email list**
