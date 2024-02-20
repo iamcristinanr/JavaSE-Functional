@@ -88,7 +88,7 @@ Disadvantages:
 
 - There are many mutable objects out of our reach so we must generate some way so that these objects do not mutate.Example. **Java lists are mutable. We can generate immutability by returning a copy this prevents add malicious emails to an email list**
 
-## PAQUET JAVA.UTIL.FUNCTION
+## 1. PAQUET JAVA.UTIL.FUNCTION
 
 ### FUNCTION
 
@@ -103,33 +103,46 @@ For example, you can define the predicate isEven that receives an Integer.
 
 ### CONSUMER AND SUPPLIER
 
-Consumer: It is a lambda expression that accepts a single value and does not return any value. Example: A function that receives a list of files and deletes each of them, without returning anything.
+- Consumer: It is a lambda expression that accepts a single value and does not return any value. Example: A function that receives a list of files and deletes each of them, without returning anything.
 
-Supplier: It is an expression that has no parameters but returns a result. Example: A supplier of type CLIArguments called generator is created that does not receive a parameter but creates a new CLIArguments object and returns generator. Files can be created on demand.
+- Supplier: It is an expression that has no parameters but returns a result. Example: A supplier of type CLIArguments called generator is created that does not receive a parameter but creates a new CLIArguments object and returns generator. Files can be created on demand.
 
 ### OPERATORS AND BIFUNCTION
+These functions extend Function. It means that they have the apply method.
 
-## SAM Y FUNCTIONAL INTERFACE
+- **UnaryOPerator** --> Only a single data type is specified. It will result in the same type.
 
-## REFERENCE OPERATOR
+- **BinaryOperator** --> Only one data type is specified. It will have **2 input parameters and one return** parameter of the same data type.
 
-## TYPE INFERENCE
+- **Bifunction** --> 2 input parameters, the data type must be specified. It can have different types of inputs as well as different types of output.
 
-## SYNTAX OF LAMBDAS FUNCTIONS
+## 2. SAM Y FUNCTIONAL INTERFACE
 
-## DEFAULT METHOD
+- **SAM** is the abbreviation of ++Single Abstract Method++.
 
-## CHAINING
+- A functional interface is an interface that contains only one **abstract method**. They can have only one functionality to exhibit. From Java 8 onwards, lambda expressions can be used to represent the instance of a functional interface. A functional interface can have any number of default methods. Runnable, ActionListener, Comparable are some of the examples of functional interfaces.Before Java 8, we had to create anonymous inner class objects or implement these interfaces.
 
-## COMPOSITION OF FUNCTIONS
+- @FunctionalInterface annotation is used to ensure that the functional interface can’t have more than one abstract method. In case more than one abstract methods are present, the compiler flags an ‘Unexpected @FunctionalInterface annotation’ message. However, it is not mandatory to use this annotation.
 
-## CLASS OPTIONAL
+## 3. REFERENCE OPERATOR
 
-## STREAM
+## 4. TYPE INFERENCE
 
-## STREAM LISTENER
+## 5. SYNTAX OF LAMBDAS FUNCTIONS
 
-## OPERATIONS AND COLLECTORS
+## 6. DEFAULT METHOD
+
+## 7. CHAINING
+
+## 8. COMPOSITION OF FUNCTIONS
+
+## 9. CLASS OPTIONAL
+
+## 10. STREAM
+
+## 11. STREAM LISTENER
+
+## 12. OPERATIONS AND COLLECTORS
 
 These functions that receive lambdas and are responsible for working (operating) on ​​the data of a Stream are generally known as **Operations.**
 
@@ -167,13 +180,13 @@ For example:
 
 The findAny operation tries to find any element that meets the condition of the Predicate that we pass as a parameter. However, the operation says that an Optional is returned. What happens when you don't find any items? Of course, that's why it returns an Optional! Because there could be cases where no element in the Stream meets the condition.
 
-## TYPE-SPECIFIC STREAM AND PARALLELISM
+## 13. TYPE-SPECIFIC STREAM AND PARALLELISM
 
-## TERMINAL OPERATIONS
+## 14. TERMINAL OPERATIONS
 
-## INTERMEDIATE OPERATIONS
+## 15. INTERMEDIATE OPERATIONS
 
-## COLLECTORS
+## 16. COLLECTORS
 
 # PROYECT JOB-SEARCH
 
