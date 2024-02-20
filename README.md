@@ -87,3 +87,82 @@ Disadvantages:
 - Requires special attention in design.
 
 - There are many mutable objects out of our reach so we must generate some way so that these objects do not mutate.Example. **Java lists are mutable. We can generate immutability by returning a copy this prevents add malicious emails to an email list**
+
+## PAQUET JAVA.UTIL.FUNCTION
+
+### FUNCTION
+
+### PREDICATE
+
+### CONSUMER AND SUPPLIER
+
+### OPERATORS AND BIFUNCTION
+
+## SAM Y FUNCTIONAL INTERFACE
+
+## REFERENCE OPERATOR
+
+## TYPE INFERENCE
+
+## SYNTAX OF LAMBDAS FUNCTIONS
+
+## DEFAULT METHOD
+
+## CHAINING
+
+## COMPOSITION OF FUNCTIONS
+
+## CLASS OPTIONAL
+
+## STREAM
+
+## STREAM LISTENER
+
+## OPERATIONS AND COLLECTORS
+
+These functions that receive lambdas and are responsible for working (operating) on ​​the data of a Stream are generally known as **Operations.**
+
+There are two types of operations: intermediate and final.
+
+Each operation applied to a Stream makes the original Stream no longer usable for further operations. It is important to remember this, because trying to add operations to a Stream that is already being processed is a very common mistake.
+
+Once you have added operations to your data Stream, you will most often reach a point where you can no longer work with a Stream and need to send your data in another format, for example, JSON or a List to the database.
+
+There is a single interface that combines all the aforementioned interfaces and whose sole purpose is to provide an operation to obtain all the elements of a Stream: **Collector.**
+
+Collector<T, A, R> is an interface that will take data of type T from the Stream, a mutable data type A, where the elements will be added (mutable implies that we can change its content, like a LinkedList), and will generate a type R result.
+
+For this reason, to facilitate operations , Java 8 includes a series of Collectors already defined so as not to puzzle over how to convert our data.
+
+```bash
+public List<String> getJavaCourses(Stream<String> coursesStream) {
+    List<String> javaCourses =
+        coursesStream.filter(course -> course.contains("Java"))
+            .collect(Collectors.toList());
+
+    return javaCourses;
+}
+```
+
+Using java.util.stream.Collectors we can very easily convert a Stream into a Set, Map, List, Collection, etc. The Collectors class already has methods to generate a Collector that corresponds to the data type that your Stream is using. It is even worth noting that Collectors can generate a ConcurrentMap that can be useful if you require multiple threads.
+
+Using Collectors.toXXX is the reverse process of using Collection.stream(). This makes it easy to generate public APIs that work with common structures/collections and internally use Stream to streamline operations on our end.
+
+The only way to obtain data that is no longer a Stream is by using Collectors, since most Stream operations focus on operating the data from the Stream and generating a new Stream with the results of the operation.
+
+However, some operations do not have a return. For example, forEach, which is an operation that does not generate any data. In order to understand what each operation does, it is enough to consider what the operation does in order to understand what may or may not return.
+
+For example:
+
+The findAny operation tries to find any element that meets the condition of the Predicate that we pass as a parameter. However, the operation says that an Optional is returned. What happens when you don't find any items? Of course, that's why it returns an Optional! Because there could be cases where no element in the Stream meets the condition.
+
+## TYPE-SPECIFIC STREAM AND PARALLELISM
+
+## TERMINAL OPERATIONS
+
+## INTERMEDIATE OPERATIONS
+
+## COLLECTORS
+
+# PROYECT JOB-SEARCH
+
