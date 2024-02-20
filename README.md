@@ -92,9 +92,20 @@ Disadvantages:
 
 ### FUNCTION
 
+Using the Function interface of the java.util.function package, it is possible to define functions as if they were just another variable. This is done by instantiating an anonymous class that implements the Function<T, R> interface, where T is the type of data that will be received as a parameter, and R is the type of data returned. In addition, you must @Override the **apply method** by writing in it the code that corresponds to the function you want to define. ⠀
+
+
 ### PREDICATE
 
+Using the Predicate interface, it is possible to define functions just as with Function, but in this case the result type will always be Boolean, and you must @Override the **test method**. ⠀
+
+For example, you can define the predicate isEven that receives an Integer.
+
 ### CONSUMER AND SUPPLIER
+
+Consumer: It is a lambda expression that accepts a single value and does not return any value. Example: A function that receives a list of files and deletes each of them, without returning anything.
+
+Supplier: It is an expression that has no parameters but returns a result. Example: A supplier of type CLIArguments called generator is created that does not receive a parameter but creates a new CLIArguments object and returns generator. Files can be created on demand.
 
 ### OPERATORS AND BIFUNCTION
 
