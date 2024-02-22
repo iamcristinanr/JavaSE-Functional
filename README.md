@@ -238,8 +238,37 @@ Difference between **compose** and **andThen** is the order they execute the fun
 The Optional class allows you to encapsulate data whose value is not certain, avoiding the use of null values, NullPointerException exceptions and the repetition of data type checks != null. ⠀ This class also provides methods that can be used to manage the data within the Optional, or to consider cases when the data is not present. Depending on the case, these methods can receive a Function, Consumer, Supplier, etc. ⠀ For example, the getPerson function loads a Person from the database and returns it within an Optional<Person>.
 
 ## 10. STREAM
+Stream: It is a data stream, the stream class is a list that contains self-iterable elements. When you create a list, you decide what operations to do for each item in the list.
+
+Streams are used to process collections of objects. A stream is a sequence of objects that supports multiple methods that can be piped to produce the desired result.
+
+The features of Java stream are:
+
+- A stream is not a data structure, but rather takes information from collections.
+
+- Streams do not change the original data structure, they only provide the result based on the piped methods.
+
+- Each intermediate operation is executed lazily and returns a stream as a result, so multiple intermediate operations can be pipelined. Terminal operations mark the end of the sequence and return the result.
 
 ## 11. STREAM LISTENER
+
+Streams have two types of operations:
+
+**Intermediate Operations**: Generate a new Stream
+
+- **map**: The map method is used to returns a stream consisting of the results of applying the given function to the elements of this stream. List number = Arrays.asList(2,3,4,5);  List square = number.stream().map(x-&gt;x*x).collect(Collectors.toList());
+
+- **filter**: The filter method is used to select elements as per the Predicate passed as argument.     List names = Arrays.asList(&quot;Reflection&quot;,&quot;Collection&quot;,&quot;Stream&quot;);  List result = names.stream().filter(s-&gt;s.startsWith(&quot;S&quot;)).collect(Collectors.toList());
+
+- **sorted**: The sorted method is used to sort the stream.     List names = Arrays.asList(&quot;Reflection&quot;,&quot;Collection&quot;,&quot;Stream&quot;); List result = names.stream().sorted().collect(Collectors.toList());
+
+**Terminal Operations**: Generate final data
+
+- **collect**: The collect method is used to return the result of the intermediate operations performed on the stream.     List number = Arrays.asList(2,3,4,5,3);  Set square = number.stream().map(x-&gt;x*x).collect(Collectors.toSet());
+
+- **forEach**: The forEach method is used to iterate through every element of the stream.     List number = Arrays.asList(2,3,4,5);  number.stream().map(x-&gt;x*x).forEach(y-&gt;System.out.println(y));
+
+- **reduce**: The reduce method is used to reduce the elements of a stream to a single value. The reduce method takes a BinaryOperator as a parameter.     List number = Arrays.asList(2,3,4,5);  int even = number.stream().filter(x-&gt;x%2==0).reduce(0,(ans,i)-&gt; ans+i);
 
 ## 12. OPERATIONS AND COLLECTORS
 
@@ -280,6 +309,17 @@ For example:
 The findAny operation tries to find any element that meets the condition of the Predicate that we pass as a parameter. However, the operation says that an Optional is returned. What happens when you don't find any items? Of course, that's why it returns an Optional! Because there could be cases where no element in the Stream meets the condition.
 
 ## 13. TYPE-SPECIFIC STREAM AND PARALLELISM
+When to use Parallel Streams?
+
+- They should be used when the output of the operation is not needed to be dependent on the order of elements present in source collection (i.e. on which the stream is created)
+
+- Parallel Streams can be used in case of aggregate functions
+
+- Parallel Streams quickly iterate over the large-sized collections
+
+- Parallel Streams can be used if developers have performance implications with the Sequential Streams
+
+- If the environment is not multi-threaded, then Parallel Stream creates thread and can affect the new requests coming in
 
 ## 14. TERMINAL OPERATIONS
 
