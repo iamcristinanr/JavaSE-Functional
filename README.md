@@ -142,13 +142,100 @@ Type inference automatically assigns a data type to a function without requiring
 
 ## 5. SYNTAX OF LAMBDAS FUNCTIONS
 
+Lambda that receives a parameter and performs a simple operation:
+
+```bash
+(text -> System.out.println(text))
+```
+Lambda that takes no parameters and performs a simple return operation:
+
+```bash
+(() -> "Hello world")
+```
+Lambda that receives a single parameter and performs a simple return operation:
+
+```bash
+x -> x % 2 == 0
+```
+Lambda that receives several parameters (BiFunction):
+
+```bash
+(x, y) -> x * y
+```
+Lambda that performs several operations:
+
+```bash
+(x, y) -> {
+  System.out.println("Suma de x: " + x + ", y: " + y);
+  System.out.println(x + y);
+}
+```
+Lambda that performs various operations and returns:
+
+```bash
+(x, y) -> {
+  System.out.println("Suma de x: " + x + ", y: " + y);
+  return x + y;
+}
+```
+
+**When performing operations with keys, return must be indicated explicitly.**
+
+Lambda with parameter typing:
+
+```bash
+(String text) -> System.out.println(text);
+```
+
+Lambda that returns a data that occupies several lines:
+
+```bash
+() -> (
+  "<div class='movieSearch'>" +
+  " <div class='movie-close'>" +
+  "   <button class='movie-close-button'>" +
+  "     <figure>" +
+  "       <img src='src/images/close.png'>" +
+  "     </figure>" +
+  "   </button>" +
+  " </div>" +
+  "</div>"
+)
+```
+
+Lambda that does not receive anything by parameters and does not return anything either.
+Example: When we need to make a connection. We may not need to receive anything as a parameter and it does not return anything.
+```bash
+(() -> {})
+
+(() -> ¨{System.out.println("Nothing");
+});
+
+(() -> {
+  System.out.println("Nothing");
+  System.out.println("Nothing");
+});
+```
+
+
 ## 6. DEFAULT METHOD
+
+Default gives us the possibility of defining a base behavior for the interface and thus defining what parameters will be necessary.
 
 ## 7. CHAINING
 
+Chaining consists of making consecutive calls to different methods of the same object. ⠀ 
+A clear example is when using the StringBuilder class, it allows you to chain calls to the initially created object to manipulate the creation of a String.
+
 ## 8. COMPOSITION OF FUNCTIONS
 
+Higher order functions take a function as a parameter and generate a function as a result.
+
+Difference between **compose** and **andThen** is the order they execute the functions. While the compose function executes the caller last and the parameter first, the andThen executes the caller first and the parameter last. Let's first define two simple functions - times2 and squared.
+
 ## 9. CLASS OPTIONAL
+
+The Optional class allows you to encapsulate data whose value is not certain, avoiding the use of null values, NullPointerException exceptions and the repetition of data type checks != null. ⠀ This class also provides methods that can be used to manage the data within the Optional, or to consider cases when the data is not present. Depending on the case, these methods can receive a Function, Consumer, Supplier, etc. ⠀ For example, the getPerson function loads a Person from the database and returns it within an Optional<Person>.
 
 ## 10. STREAM
 
