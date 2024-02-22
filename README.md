@@ -323,6 +323,150 @@ When to use Parallel Streams?
 
 ## 14. TERMINAL OPERATIONS
 
+Terminal operations are those operations that do not generate a new Stream as a result. Your result may vary depending on the operation. The usefulness of these is to be able to generate a final value for all our operations or consume the final data. The main reason for wanting this is that the data will need to exit at some point in our control and it is with terminal operations that we do this.
+
+Let's think, for example, of a web server. Receives a data request, converts the request into a Stream<JSON>, processes the data using filter or map, converts JSON to local data that can be manipulated by Java code and consumes a database. All this through streams of different types. But eventually it has to return a response to the person who made the request.
+
+What happens if the person who made the request is not using Java? We cannot send a Stream type object to code made in Python or JavaScript... that is where a final operation helps us convert our Java Stream into some type of data that is more understandable.
+
+Another clear example is if we are creating a library or creating code that more people on our team will use. When creating our methods and classes we use streams here and lambdas there, but by exposing these methods for use by other developers we cannot force them to use Stream.
+
+The reasons are varied. We do not want to force and limit those who use our code to work with a single data type. We don't know what version of Java anyone using our code is using. We don't know if Stream is available in your part of the code (e.g. on Android it wasn't available at all), etc.
+
+That is why we would like to provide something simpler: lists, primitives or even provide some mechanism to be able to use external code on our side.
+
+The most common terminal operations found in Stream are:
+
+**Terminal matching operations**
+anyMatch, allMatch, noneMatch
+The anyMatch, allMatch and noneMatch operations are used to determine if there are elements in a Stream that satisfy a certain Predicate.
+All three return a boolean:
+
+//Tells us if a stream contains an element according to the Predicate that we pass to it:
+```bash
+Stream<Integer> numbersStream = Stream.of(1, 2, 3, 4, 5, 6, 7, 11);
+boolean biggerThanTen = numbersStream.anyMatch(i -> i > 10); //true because we have 11
+```
+//allMatch
+//Tells us if all the elements of a Stream comply with a certain Predicate:
+```bash
+Stream<Integer> agesStream = Stream.of(19, 21, 35, 45, 12);
+boolean allLegalDrinkingAge = agesStream.allMatch(age -> age > 18); //false, we have a minor
+```
+//noneMatch
+//Tells us if all the elements of a Stream DO NOT MEET a certain Predicate:
+```bash
+Stream<Integer> oddNumbers = Stream.of(1, 3, 5, 7, 9, 11);
+boolean allAreOdd = oddNumbers.noneMatch(i -> i % 2 == 0);
+```
+
+**Search terminal operations**
+findAny, findFirst
+These operations return an Optional<T> as a result of searching for an element within the Stream.
+
+The difference between the two is that findFirst will return an Optional containing the first element in the Stream if the Stream has previously defined a sorting operation or to find elements. Otherwise, it will work the same as findAny, trying to return any element present in the Stream in a non-deterministic (random) way.
+
+If the found element is null, you'll have to deal with an annoying NullPointerException. If the Stream is empty, the return is equivalent to Optional.empty().
+
+The main reason for using these operations is to be able to use the elements of a Stream after having filtered and converted data types. With Optional we ensure that, even if there are no results, we can continue working without exceptions or writing conditionals to validate the data.
+
+**Terminal reduction operations**
+**min, max**
+They are two operations whose purpose is to obtain the smallest element (min) or the largest element (max) of a Stream using a Comparator. There may be cases of empty Streams, which is why the two operations return an Optional so that in those cases we can use Optional.empty.
+
+The Comparator interface is a @FunctionalInterface, so it's easy to use min and max with lambdas:
+
+```bash
+Stream<Long> bigNumbers = Stream.of(100L, 200L, 1000L, 5L);
+Optional<Long> minimumOptional = bigNumbers.min((numberX, numberY) -> (int) Math.min(numberX, numberY));
+```
+**Reduces**
+This operation exists in three forms:
+
+- reduce(initialValue, BinaryOperator)
+- reduce(BinaryAccumulator)
+- reduce(initialValue, BinaryFunction, BinaryOperator)
+The difference between the 3 types of invocation:
+
+1. Reduce(BinaryAccumulator)
+Returns an Optional of the same type as the Stream, with a single value resulting from applying the BinaryAccumulator on each element or Optional.empty() if the stream was empty. You can throw a NullPointerException in cases where the result of the BinaryAccumulator is null.
+
+```bash
+Stream<String> aLongStoryStream = Stream.of("Cuando", "despertó,", "el", "dinosaurio", "todavía", "estaba", "allí.");
+Optional<String> longStoryOptional = aLongStoryStream.reduce((previousStory, nextPart) -> previousStory + " " + nextPart);
+longStoryOptional.ifPresent(System.out::println); //"Cuando despertó, el dinosaurio todavía estaba allí."
+```
+
+2. Reduce(valorInicial, BinaryOperator)
+Retorna un valor del mismo tipo que el Stream después de aplicar BinaryOperator sobre cada elemento del Stream. En caso de un Stream vacío, el valorInicial es retornado.
+
+
+```bash
+Stream<Integer> firstTenNumbersStream = Stream.iterate(0, i -> i + 1).limit(10);
+int sumOfFirstTen = firstTenNumbersStream.reduce(0, Integer::sum); //45 -> 0 + 1 + … + 9
+```
+
+And the most interesting case...
+
+3. reduce(initialValue, BinaryFunction<V, T, V>, BinaryOperator<V>)
+Generates a value of type V after applying BinaryFunction on each element of type T in the Stream and obtaining a result V.
+
+This version of reduce uses the BinaryFunction like map + reduce. That is, for each element in the Stream a value V is generated based on the InitialValue and the previous result of the BinaryFunction. BinaryOperator is used in parallel streams (stream.parallel()) to determine the value to hold in each iteration.
+
+```bash
+Stream<String> aLongStoryStreamAgain = Stream.of("Cuando", "despertó,", "el", "dinosaurio", "todavía", "estaba", "allí.");
+int charCount = aLongStoryStreamAgain.reduce(0, (count, word) -> count + word.length(), Integer::sum);
+```
+
+**count**
+A simple operation: it is used to obtain how many elements there are in the Stream.
+
+```bash
+Stream<Integer> yearsStream = Stream.of(1990, 1991, 1994, 2000, 2010, 2019, 2020);
+long yearsCount = yearsStream.count(); //7, it only tells us how much data the stream had.
+```
+The main reason for using this operation is that, by applying filter or flatMap, our Stream can grow or decrease in size and, perhaps, for many operations we are only interested in knowing how many elements were present in the Stream. For example, how many files were deleted or how many were created, for example.
+
+**toArray**
+Adds all the elements of the Stream to an array and returns said array. The operation generates an Object[], but it is possible to cast to the Stream data type.
+
+**collect**
+We mentioned the collect operation in the reading about operations and collectors, where we mentioned that:
+
+
+Collector<T, A, R> is an interface that will take data of type T from the Stream, a mutable data type A, where the elements will be added (mutable implies that we can change its content, like a LinkedList) and will generate a result type R.
+Using java.util.stream.Collectors we can simply convert a Stream into a Set, Map, List, Collection, etc. The Collectors class already has methods to generate a Collector that corresponds to the type of data that your Stream is using. It is even worth noting that Collectors can generate a ConcurrentMap that can be useful if you require multiple threads.
+
+```bash
+public List<String> getJavaCourses(Stream<String> coursesStream) {
+     List<String> javaCourses =
+         coursesStream.filter(course -> course.contains("Java"))
+             .collect(Collectors.toList());
+
+     return javaCourses;
+}
+```
+
+**Terminal iteration operations**
+**forEach**
+As simple and as cute as a classic for. forEach is an operation that receives a Consumer<T> and does not have a return value (void). The main use of this operation is to give a final use to the elements of the Stream.
+
+```bash
+Stream<List<String>> courses = getCourses();
+courses.forEach(courseList -> System.out.println("Available courses: " + courseList));
+```
+**Conclusions**
+Terminal operations are responsible for giving an end and freeing the space used by a Stream. They are also the way to break method chains between streams and return our code to a linear execution point. As their name implies, they are usually the last operation present when you write chaining:
+
+```bash
+Stream<Integer> infiniteStream = Stream.iterate(0, x -> x + 1);
+List<Integer> numbersList = infiniteStream.limit(1000)
+     .filter(x -> x % 2 == 0) // Intermediate operation
+     .map(x -> x * 3) //Intermediate operation
+     .collect(Collectors.toList()); //Final operation
+```
+Finally, remember that once you have added an operation to a Stream, the original Stream can no longer be used. And even more so when adding a terminal operation, since this no longer creates a new Stream. Internally, upon receiving an operation, the Stream at some point calls its close method, which is responsible for freeing the data and memory of the Stream.
+
 ## 15. INTERMEDIATE OPERATIONS
 
 ## 16. COLLECTORS
