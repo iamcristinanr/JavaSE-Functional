@@ -469,6 +469,203 @@ Finally, remember that once you have added an operation to a Stream, the origina
 
 ## 15. INTERMEDIATE OPERATIONS
 
+Any operation within a Stream that returns a new Stream as a result is called an intermediate operation. That is, after invoking an intermediate operation with a certain type of data, we will obtain a new Stream containing the already modified data as a result.
+
+The Stream that receives the intermediate operation becomes “consumed” after the invocation of the operation, making it unusable for subsequent operations. If we decide to use the Stream for some other type of operations we will have an IllegalStateException.
+
+Seeing it in code with an example should be clearer:
+
+```bash
+Stream<String> initialCourses = Stream.of("Java", "Spring", "Node.js");
+
+Stream<Integer> lettersOnCourses = initialCourses.map(course -> course.length());
+//From this point on, initialCourses cannot add any more operations.
+
+Stream<Integer> evenLengthCourses = lettersOnCourses.filter(courseLength -> courseLength % 2 == 0);
+//lettersOnCourses is consumed at this point and cannot add any more operations. It is not possible to use the Stream other than as a reference.
+
+```
+
+The previous example can be rewritten using chaining. However, the usefulness of this example is to demonstrate that the intermediate operations generate a new Stream.
+
+**Available operations**
+The Stream interface has a group of intermediate operations. Throughout this reading we will explain each of them and try to approximate their functionality. Each operation has different implementations depending on the Stream implementation. In our case, we will only make approximations of the logic that the operation follows.
+
+The operations that are already defined are:
+
+filter(…)
+map(…)
+flatMap(…)
+distinct(…)
+limit(…)
+peek(…)
+skip(…)
+sorted(…)
+Let's analyze what each of them does and make code that is close to what they do internally.
+
+**filter**
+Stream's filtering operation has the following form:
+```bash
+Stream<T> filter(Predicate<? super T> predicate)
+```
+Some things that we can deduce only by seeing the elements of the operation are:
+
+- The operation works on a Stream and returns a new Stream of the same type (T)
+- However, the Predicate that receives as a parameter works with elements of type T and any element as long as it is a subtype of T. This means that if we have the class PlatziStudent extends Student and we have a Stream<Student> where we also have elements of type PlatziStudent, we can filter them without having to review or clarify the type
+- Predicate is a @FunctionalInterface (as you saw in class 11), which allows us to pass as a parameter objects that implement this interface or lambdas
+
+The use of this operation is simple:
+
+```bash
+public Stream<String> getJavaCourses(List<String> courses){
+     return courses.stream()
+         .filter(course -> course.contains("Java"));
+}
+```
+The interesting thing lies in the condition that we use in our lambda, with it we determine whether or not an element should remain in the resulting Stream. In the previous reading we made an approximation of the filter operation:
+
+```bash
+public Stream<T> filter(Predicate<T> predicate) {
+     List<T> filteredData = new LinkedList<>();
+     for(T t : this.data){
+         if(predicate.test(t)){
+             filteredData.add(t);
+         }
+     }
+
+     return filteredData.stream();
+}
+```
+filter is responsible for iterating each element of the Stream and evaluating with the Predicate whether or not the element should be in the resulting Stream. If our Predicate is simple and does not include any loops or calls to other functions that may have loops, the time complexity is O(n), which makes filtering quite fast.
+
+Common uses of filter is to clean a Stream of data that does not meet a certain criteria. As an example, you could think of a Stream of banking transactions, keep the Stream only those that exceed a certain amount to send them to audit, from a group of student grades, filter only those who passed with a grade higher than 6, from a group of JSON objects keep those that have a specific property, etc.
+
+The simpler the filter condition, the more readable the code will be. I recommend that, if you have more than one filter condition, don't be afraid to use filter several times:
+
+```bash
+courses.filter(course -> course.getName().contains("Java"))
+     .filter(course -> course.getDuration() > 2.5)
+     .filter(course -> course.getInstructor().getName() == Instructors.SINUHE_JAIME)
+```
+Your code will be more readable and the reasons why you are applying each filter will make more sense. As something additional, you could move this logic to individual functions in case you want to make the code more readable, have an easier time writing tests, or use the same logic in more than one place for some lambdas:
+
+```bash
+courses.filter(Predicates::isAJavaCourse)
+     .filter(Predicates::hasEnoughDuration)
+     .filter(Predicates::hasSinuheAsInstructor);
+
+// The logic is the same:
+public final class Predicates {
+     public static final boolean isAJavaCourse(Course course){
+         return course.getName().contains("Java");
+     }
+}
+
+```
+
+**map**
+The map operation may seem complicated at first and even confusing if you are used to using Map<K,V>, but it should be noted that there is no relationship between the structure and the operation. The operation is merely a transformation from one type to another.
+
+```bash
+Stream<R> map(Function<? super T, ? extends R> mapper)
+```
+The details to highlight are very similar to those of filter, but the key difference is in T and R. These generics tell us that map is going to take a data type T, whatever it is, it will apply the mapper function and generate an R .
+
+It is something similar to what you did in high school when converting data into a table, for each x you applied an operation and obtained a y (some call this tabular). map will operate on each element in the initial Stream applying the Function that you pass to it as a lambda to generate a new element and make it part of the resulting Stream:
+
+```bash
+
+Stream<DatabaseID> ids = DatabaseUtils.getIds().stream();
+
+Stream<User> users = ids.map(id -> db.getUserWithId(id));
+```
+Or, put another way, for each DatabaseID in the initial Stream, applying map generates a User:
+
+- DatabaseID(1234) -> map(…) -> User(Sinuhe Jaime, @Sierisimo)
+- DatabaseID(4321) -> map(…) -> User(Diego de Granda, @degranda10)
+- DatabaseID(007) -> map(…) ->User(Oscar Barajas, @gndx)
+
+This is quite practical when we want to do some data conversion and we are not really interested in the complete data (only parts of it) or if we want to convert to complex data based on a base data.
+
+If we wanted to replicate what map does internally it would be relatively simple:
+
+```bash
+public Stream<R> map(Function<T, R> mapper) {
+     List<R> mappedData = new LinkedList<>();
+     for(T t : this.data) {
+         R r = mapper.apply(t);
+         mappedData.add(r);
+     }
+
+     return mappedData.stream();
+}
+
+```
+The map operation seems simple already seen this way. However, within the different implementations of Stream it makes several validations and optimizations so that the operation can be invoked in parallel, to prevent some type conversion errors and make it faster than our version with a for.
+
+**flatMap**
+Sometimes we cannot avoid encountering streams of the type Stream<List<Courses>>, where we have data with a lot of data...
+
+This type of stream is quite common and can happen to you for multiple reasons. It can become difficult to operate the initial Stream if we want to apply some operation to each of the elements in each of the lists.
+
+If maintaining the structure of the lists (or collections) is not important for the processing of the data they contain, then we can use flatMap to simplify the structure of the Stream, changing it from Stream<List<Courses>> to Stream<Courses>.
+
+Seen in a more “visual” example:
+```bash
+Stream<List<Courses>> coursesLists; // Stream{List["Java", "Java 8 Functional", "Spring"], List["React", "Angular", "Vue.js"], List["Big Data", "Pandas"]}
+Stream<Courses> allCourses; // Stream{ ["Java", "Java 8 Functional", "Spring", "React", "Angular", "Vue.js", "Big Data", "Pandas"]}
+```
+
+flatMap has the following form:
+```bash
+<R> Stream<R> flatMap(Function<? super T, ? extends Stream<? extends R>> mapper)
+```
+
+The interesting thing is that the result of the mapper function must be a Stream<R>. Stream will use the result of mapper to “roll up” elements into one Stream from another Stream. It may sound confusing, so exemplifying it will help us understand it better:
+
+```bash
+//We have this class:
+public class PlatziStudent {
+     private boolean emailSubscribed;
+     private List<Email> emails;
+
+     public boolean isEmailSubscribed() {
+         return emailSubscribed;
+     }
+
+     public List<Email> getEmails(){
+         return new LinkedList<>(emails); //We create a copy of the list to keep the class immutable for safety
+     }
+}
+
+//First we obtain user type objects registered in Platzi:
+Stream<PlatziStudent> platziStudents = getPlatziUsers().stream();
+
+// Afterwards, we want to send an email to all users but... we are only interested in obtaining their email to notify them:
+Stream<Email> allEmailsToNotify =
+                         platziStudents.filter(PlatziStudent::isEmailSubscribed) //First we avoid sending emails to those who are not subscribed
+                                     .flatMap(student -> student.getEmails().stream()); // The lambda generates a new Stream of each student's email list.
+
+sendMonthlyEmails(allEmailsToNotify);
+//The final Stream is only a Stream of emails, without more details or additional information.
+
+```
+flatMap is a way we can purge data of additional information that is not needed.
+
+**distinct**
+This operation is simple:
+```bash
+Stream<T> distinct()
+```
+What it does is compare each element of the Stream against the rest using the equals method. This way, you prevent the Stream from containing duplicate elements. The operation, being intermediate, returns a new Stream where the elements are unique. Remember that to guarantee this it is recommended that you override the equals method in your classes that represent data.
+
+limit
+The limit operation receives a long that determines how many elements of the original Stream will be preserved. If the number is greater than the initial number of elements in the Stream, basically all elements will remain in the Stream. An interesting detail is that some Stream implementations can be sorted (sorted()) or explicitly unordered (unordered()), which can drastically change the result of the operation and performance.
+
+Stream<T> limit(long maxSize)
+The operation ensures that the elements in the resulting Stream will be the first to appear in the Stream. That is why the operation is lightweight when the Stream is sequential or the unordered() operation was used (not available in all Streams, since the operation belongs to another class).
+
+As an additional challenge, create the code to represent
 ## 16. COLLECTORS
 
 # PROYECT JOB-SEARCH
