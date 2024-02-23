@@ -489,6 +489,7 @@ Stream<Integer> evenLengthCourses = lettersOnCourses.filter(courseLength -> cour
 The previous example can be rewritten using chaining. However, the usefulness of this example is to demonstrate that the intermediate operations generate a new Stream.
 
 **Available operations**
+
 The Stream interface has a group of intermediate operations. Throughout this reading we will explain each of them and try to approximate their functionality. Each operation has different implementations depending on the Stream implementation. In our case, we will only make approximations of the logic that the operation follows.
 
 The operations that are already defined are:
@@ -501,13 +502,17 @@ limit(…)
 peek(…)
 skip(…)
 sorted(…)
+
 Let's analyze what each of them does and make code that is close to what they do internally.
 
 **filter**
+
 Stream's filtering operation has the following form:
+
 ```bash
 Stream<T> filter(Predicate<? super T> predicate)
 ```
+
 Some things that we can deduce only by seeing the elements of the operation are:
 
 - The operation works on a Stream and returns a new Stream of the same type (T)
@@ -522,7 +527,7 @@ public Stream<String> getJavaCourses(List<String> courses){
          .filter(course -> course.contains("Java"));
 }
 ```
-The interesting thing lies in the condition that we use in our lambda, with it we determine whether or not an element should remain in the resulting Stream. In the previous reading we made an approximation of the filter operation:
+The interesting thing resides in the condition that we use in our lambda, with it we determine whether or not an element should remain in the resulting Stream. In the previous reading we made an approximation of the filter operation:
 
 ```bash
 public Stream<T> filter(Predicate<T> predicate) {
@@ -536,6 +541,7 @@ public Stream<T> filter(Predicate<T> predicate) {
      return filteredData.stream();
 }
 ```
+
 filter is responsible for iterating each element of the Stream and evaluating with the Predicate whether or not the element should be in the resulting Stream. If our Predicate is simple and does not include any loops or calls to other functions that may have loops, the time complexity is O(n), which makes filtering quite fast.
 
 Common uses of filter is to clean a Stream of data that does not meet a certain criteria. As an example, you could think of a Stream of banking transactions, keep the Stream only those that exceed a certain amount to send them to audit, from a group of student grades, filter only those who passed with a grade higher than 6, from a group of JSON objects keep those that have a specific property, etc.
@@ -564,6 +570,7 @@ public final class Predicates {
 ```
 
 **map**
+
 The map operation may seem complicated at first and even confusing if you are used to using Map<K,V>, but it should be noted that there is no relationship between the structure and the operation. The operation is merely a transformation from one type to another.
 
 ```bash
@@ -604,6 +611,7 @@ public Stream<R> map(Function<T, R> mapper) {
 The map operation seems simple already seen this way. However, within the different implementations of Stream it makes several validations and optimizations so that the operation can be invoked in parallel, to prevent some type conversion errors and make it faster than our version with a for.
 
 **flatMap**
+
 Sometimes we cannot avoid encountering streams of the type Stream<List<Courses>>, where we have data with a lot of data...
 
 This type of stream is quite common and can happen to you for multiple reasons. It can become difficult to operate the initial Stream if we want to apply some operation to each of the elements in each of the lists.
@@ -650,22 +658,77 @@ sendMonthlyEmails(allEmailsToNotify);
 //The final Stream is only a Stream of emails, without more details or additional information.
 
 ```
+
 flatMap is a way we can purge data of additional information that is not needed.
 
 **distinct**
+
 This operation is simple:
+
 ```bash
 Stream<T> distinct()
 ```
+
 What it does is compare each element of the Stream against the rest using the equals method. This way, you prevent the Stream from containing duplicate elements. The operation, being intermediate, returns a new Stream where the elements are unique. Remember that to guarantee this it is recommended that you override the equals method in your classes that represent data.
 
-limit
+**limit**
+
 The limit operation receives a long that determines how many elements of the original Stream will be preserved. If the number is greater than the initial number of elements in the Stream, basically all elements will remain in the Stream. An interesting detail is that some Stream implementations can be sorted (sorted()) or explicitly unordered (unordered()), which can drastically change the result of the operation and performance.
 
+```bash
 Stream<T> limit(long maxSize)
+```
+
 The operation ensures that the elements in the resulting Stream will be the first to appear in the Stream. That is why the operation is lightweight when the Stream is sequential or the unordered() operation was used (not available in all Streams, since the operation belongs to another class).
 
-As an additional challenge, create the code to represent
+As an additional challenge, create the code to represent.
+
+**peek**
+
+peek works like a magnifying glass, like a moment of observation of what is happening in the Stream. What this operation does is take a Consumer, pass the data as it is present in the Stream and generate a new identical Stream to continue operating.
+
+The structure of peek is simple:
+
+```bash
+Stream look<T>(Consumer<? super T> consumer)
+```
+
+Using it can help us generate logs or records of the Stream data, for example:
+
+```bash
+Stream<Connection> serverConnections =
+    server.getConnectionsStream()
+        .peek(connection -> logConnection(connection, new Date()))
+        .filter(…)
+        .map(…)
+    //Other operations…
+```
+
+**skip**
+
+This operation is contrary to limit(). While limit() reduces the elements present in the Stream to a specific number, skip discards the first n elements and generates a Stream with the remaining elements in the Stream.
+
+This is:
+
+```bash
+Stream<Integer> first10Numbers = Stream.of(0,1,2,3,4,5,6,7,8,9);
+Stream<Integer> last7Numbers = first10Numbers.skip(3); // 3,4,5,6,7,8,9
+```
+
+This can be useful if we know what part of the information can be discarded. For example, discarding the first line of an XML (<? xml…>), discarding metadata from a photo, testing users at the start of a database, introducing a video, etc.
+
+**sorted**
+
+The sorted() operation requires that the elements present in the Stream implement the Comparable interface in order to be able to sort naturally within the Stream. The resulting Stream contains all the elements but already ordered. Sorting has many advantages. I recommend Platzi's algorithms courses to learn more about these advantages.
+
+**Conclusions**
+
+Intermediate operations allow us to have control over the streams and manipulate their contents in a simple way without really worrying about how the changes are made.
+
+Remember that intermediate operations have the functionality of generating new streams that we can output so that other parts of the code can use them.
+
+Although there are other intermediate operations in different Stream implementations, the ones we list here are present in the base interface, so understanding these operations will make your life easier in most uses of Stream.
+
 ## 16. COLLECTORS
 
 # PROYECT JOB-SEARCH
