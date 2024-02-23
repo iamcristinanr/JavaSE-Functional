@@ -731,5 +731,10 @@ Although there are other intermediate operations in different Stream implementat
 
 ## 16. COLLECTORS
 
+Collectors are used to convert a Stream to a data structure that contains the elements of the stream (such as List or Map), therefore, it is a terminal operation.
+
+Boxed() is an IntStream method that converts the IntStream into a Stream of integers, i.e. Stream<Integer>
+
+
 # PROYECT JOB-SEARCH
 
